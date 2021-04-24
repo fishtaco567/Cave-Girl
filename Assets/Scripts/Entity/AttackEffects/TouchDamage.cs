@@ -21,7 +21,6 @@ namespace Entities.AttackEffects {
         }
 
         public override bool PerTick(Effectable eff) {
-            Debug.Log(eff.gameObject.name);
             if(collider == null) {
                 collider = eff.GetComponent<Collider2D>();
             }

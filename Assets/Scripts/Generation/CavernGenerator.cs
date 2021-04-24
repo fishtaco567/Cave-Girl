@@ -5,6 +5,8 @@ using UnityEngine.Tilemaps;
 using SharpNoise;
 using Utils;
 using SharpNoise.Generators;
+using Entities;
+using Entities.Character;
 
 public class CavernGenerator : MonoBehaviour {
 
@@ -30,9 +32,12 @@ public class CavernGenerator : MonoBehaviour {
     protected float circleFunctionStrength;
 
     [SerializeField]
-    protected GameObject player;
+    protected Player player;
+
+    protected TilemapHardness hardness;
 
     protected void Start() {
+        hardness = tilemap.GetComponent<TilemapHardness>();
         GenerateMap();
     }
 
@@ -57,17 +62,25 @@ public class CavernGenerator : MonoBehaviour {
 
         var generator = new GeneratorBlend(genBlended1, genPerlin, genBlend1);
 
+        hardness.hardness = new int[width * height];
+        hardness.width = width;
+        hardness.height = height;
+
         for(int i = 0; i < width; i++) {
-            for(int j = 0; j < width; j++) {
+            for(int j = 0; j < height; j++) {
                 var circleFunction = ((i - width / 2) / (float) width) * ((i - width / 2) / (float) width) + ((j - height / 2) / (float) height) * ((j - height / 2) / (float) height);
                 circleFunction *= circleFunctionStrength;
 
                 var signal = generator.GetNoise2D(new Vector2(i, j)) - circleFunction;
 
+                var index = i + j * width;
+
                 if(signal < stoneThreshhold) {
                     tilemap.SetTile(new Vector3Int(i, j, 0), stone);
+                    hardness.hardness[index] = 1;
                 } else {
                     tilemap.SetTile(new Vector3Int(i, j, 0), grass);
+                    hardness.hardness[index] = 0;
                 }
             }
         }
@@ -81,6 +94,9 @@ public class CavernGenerator : MonoBehaviour {
                 break;
             }
         }
+
+        player.tilemap = tilemap;
+        player.hardness = hardness;
     }
 
 }

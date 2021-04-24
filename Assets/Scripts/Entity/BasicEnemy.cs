@@ -29,7 +29,9 @@ namespace Entities {
 
         protected SRandom rand;
 
-        protected virtual void Start() {
+        public override void Start() {
+            base.Start();
+
             var instSteerings = new List<SteeringEffect>(steerings.Count);
 
             foreach(SteeringEffect s in steerings) {

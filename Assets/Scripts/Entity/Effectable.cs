@@ -4,9 +4,20 @@ using System.Collections.Generic;
 namespace Entities {
     public abstract class Effectable : MonoBehaviour {
 
+        [SerializeField]
         public List<Effect> effects;
 
         public abstract void Destroy();
+
+        public virtual void Start() {
+            var instEffects = new List<Effect>(effects.Count);
+
+            foreach(Effect e in effects) {
+                instEffects.Add(Instantiate(e));
+            }
+
+            effects = instEffects;
+        }
 
         public void AddEffect(Effect newEffect) {
             effects.Add(newEffect);

@@ -14,10 +14,8 @@ namespace Entities {
         [SerializeField]
         protected GameObject spawnOnDeath;
 
-        protected void Start() {
-            if(effects == null) {
-                effects = new List<Effect>();
-            }
+        public override void Start() {
+            base.Start();
         }
 
         protected void Update() {

@@ -1,6 +1,7 @@
 ﻿using Rewired;
 using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.Tilemaps;
 
 namespace Entities.Character {
     public class Player : Effectable {
@@ -108,6 +109,9 @@ namespace Entities.Character {
         protected float playerYVelocity;
         protected bool grounded;
 
+        public Tilemap tilemap;
+        public TilemapHardness hardness;
+
         protected Rewired.Player rePlayer;
 
         protected Collider2D[] results;
@@ -118,7 +122,9 @@ namespace Entities.Character {
 
         protected Direction curDir;
 
-        protected void Start() {
+        public override void Start() {
+            base.Start();
+            
             velocity = Vector2.zero;
             state = PState.Normal;
             stateTime = 0;
@@ -170,6 +176,9 @@ namespace Entities.Character {
                 timeSinceLastBomb = 0;
                 var spawned = Instantiate(bombPrefab);
                 spawned.transform.position = transform.position;
+                var bomb = spawned.GetComponent<Bomb>();
+                bomb.SetTilemap(tilemap, hardness);
+                bomb.AddEffects(effects);
             }
 
             var swordPressed = rePlayer.GetButtonDown("Sword");
@@ -333,7 +342,7 @@ namespace Entities.Character {
                 arrowFx.Add(e.GenerateCopy());
             }
 
-            proj.SetEffects(arrowFx);
+            proj.AddEffects(arrowFx);
         }
 
         private void CheckSwordAttack() {

@@ -33,6 +33,18 @@ namespace Entities {
             return false;
         }
 
+        public virtual bool ChangeRange(Effectable eff, ref float range) {
+            return false;
+        }
+
+        public virtual bool ChangeTime(Effectable eff, ref float time) {
+            return false;
+        }
+
+        public virtual bool ChangeStrength(Effectable eff, ref float strength) {
+            return false;
+        }
+
         public abstract Effect GenerateCopy();
 
     }
