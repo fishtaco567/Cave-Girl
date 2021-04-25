@@ -22,6 +22,10 @@ namespace Entities {
             foreach(Effect effect in effects) {
                 effect.PerTick(this);
             }
+
+            var angle = Vector2.Angle(Vector2.up, velocity);
+
+            transform.localRotation = Quaternion.Euler(0, 0, angle);
         }
 
         protected void FixedUpdate() {

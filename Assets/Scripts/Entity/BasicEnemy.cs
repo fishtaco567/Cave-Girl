@@ -110,8 +110,10 @@ namespace Entities {
         }
 
         public override void Destroy() {
-            var spawned = Instantiate(spawnOnDeath);
-            spawned.transform.position = transform.position;
+            if(spawnOnDeath != null) {
+                var spawned = Instantiate(spawnOnDeath);
+                spawned.transform.position = transform.position;
+            }
 
             foreach(Effect e in effects) {
                 e.OnDestroyed(this);

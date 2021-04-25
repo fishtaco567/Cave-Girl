@@ -5,6 +5,10 @@ namespace Entities {
 
     public abstract class Effect : ScriptableObject {
 
+        public virtual bool AddEffect(Effectable eff) {
+            return false;
+        }
+
         public virtual bool PerTick(Effectable eff) {
             return false;
         }

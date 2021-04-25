@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5c695a4a940d67f47b73e6ec1a19de6b, type: 3}
   m_Name: OneDamage
   m_EditorClassIdentifier: 
+  destroy: 1
   filter:
     useTriggers: 0
     useLayerMask: 1

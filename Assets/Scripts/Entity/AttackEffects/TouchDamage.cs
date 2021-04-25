@@ -6,6 +6,12 @@ namespace Entities.AttackEffects {
     [CreateAssetMenu(fileName = "TouchDamage", menuName = "AttackEffects/TouchDamage")]
     public class TouchDamage : Effect {
 
+        [SerializeField]
+        protected bool destroy;
+
+        [System.NonSerialized]
+        public bool destroyOnTouch;
+
         protected Collider2D collider;
 
         protected Collider2D[] results;
@@ -17,6 +23,7 @@ namespace Entities.AttackEffects {
         protected int damage;
 
         protected void Awake() {
+            destroyOnTouch = destroy;
             results = new Collider2D[3];
         }
 
@@ -44,6 +51,10 @@ namespace Entities.AttackEffects {
                     hasHit = true;
                     OnHitEffects(eff, res);
                 }
+            }
+
+            if(hasHit && destroyOnTouch) {
+                eff.Destroy();
             }
 
             return hasHit;

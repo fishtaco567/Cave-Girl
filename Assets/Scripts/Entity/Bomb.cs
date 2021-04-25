@@ -97,7 +97,7 @@ namespace Entities {
 
                     if(x >= 0 && x < hardness.width && y >= 0 && y < hardness.height) {
                         if(hardness.GetHardness(x, y) <= strength) {
-                            tilemap.SetTile(new Vector3Int(x, y, 0), hardness.underWallTile);
+                            tilemap.SetTile(new Vector3Int(x, y, 0), null);
                         }
                     }
                 }

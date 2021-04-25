@@ -27,7 +27,7 @@ namespace Entities.Character {
         protected CharacterController2D controller;
 
         [SerializeField]
-        protected GameObject sprite;
+        protected SpriteRenderer sprite;
 
         [SerializeField]
         protected GameObject dropShadow;
@@ -43,6 +43,9 @@ namespace Entities.Character {
 
         [SerializeField]
         protected Animator bowAnimator;
+
+        [SerializeField]
+        protected Animator playerAnimator;
 
         [SerializeField]
         protected GameObject directionalThings;
@@ -121,6 +124,7 @@ namespace Entities.Character {
         protected float timeSinceLastBomb;
 
         protected Direction curDir;
+        public bool isDead;
 
         public override void Start() {
             base.Start();
@@ -151,16 +155,29 @@ namespace Entities.Character {
             curDir = Direction.Up;
 
             effects = new List<Effect>();
+
+            isDead = false;
+
+            GetComponent<Resources>().OnDeath += OnDeath;
+
+        }
+
+        public void OnDeath() {
+            GameManager.Instance.OnDeath();
         }
 
         protected void Update() {
+            if(isDead) {
+                return;
+            }
+
             foreach(Effect effect in effects) {
                 effect.PerTick(this);
             }
 
             sprite.transform.localPosition = new Vector3(0, WorldConstants.upAspectRatio * playerY, sprite.transform.localPosition.z);
             dropShadow.transform.localPosition = new Vector3(0, -WorldConstants.shadowAspectRatio * playerY - 0.5f, dropShadow.transform.localPosition.z);
-            dropShadow.transform.localScale = Vector3.one * (WorldConstants.shadowAspectRatio * playerY) + Vector3.one;
+            dropShadow.transform.localScale = Vector3.one * (WorldConstants.shadowAspectRatio * playerY) + new Vector3(0.5f, 0.5f, 0.5f);
 
             var interactPressed = rePlayer.GetButtonDown("Interact");
             if(interactPressed) {
@@ -203,21 +220,33 @@ namespace Entities.Character {
 
             switch(curDir) {
                 case Direction.Up:
+                    sprite.flipX = true;
                     directionalThings.transform.rotation = Quaternion.Euler(0, 0, 0);
+                    directionalThings.transform.localPosition = new Vector3(0, 0, 0.1f);
                     break;
                 case Direction.Down:
+                    sprite.flipX = true;
                     directionalThings.transform.rotation = Quaternion.Euler(0, 0, 180);
+                    directionalThings.transform.localPosition = new Vector3(0, -0.1875f, -0.1f);
                     break;
                 case Direction.Left:
+                    sprite.flipX = true;
                     directionalThings.transform.rotation = Quaternion.Euler(0, 0, 90);
+                    directionalThings.transform.localPosition = new Vector3(0, -0.125f, 0.1f);
                     break;
                 case Direction.Right:
+                    sprite.flipX = false;
                     directionalThings.transform.rotation = Quaternion.Euler(0, 0, 270);
+                    directionalThings.transform.localPosition = new Vector3(0, -0.125f, 0.1f);
                     break;
             }
         }
 
         protected void FixedUpdate() {
+            if(isDead) {
+                return;
+            }
+
             var horiz = rePlayer.GetAxis("Horizontal");
             var vert = rePlayer.GetAxis("Vertical");
 
@@ -252,6 +281,12 @@ namespace Entities.Character {
                         ChangeState(PState.RunCharge);
                     }
 
+                    if(velocity.sqrMagnitude > 0.5f) {
+                        TrySetAnimator("Run");
+                    } else {
+                        TrySetAnimator("Idle");
+                    }
+
                     CheckChangeToJump(jumpHeld);
                     break;
                 }
@@ -259,6 +294,8 @@ namespace Entities.Character {
                     if(!dashHeld) {
                         ChangeState(PState.Normal);
                     }
+
+                    TrySetAnimator("DashCharge");
 
                     if(stateTime > minHeldDash) {
                         ChangeState(PState.Run);
@@ -275,6 +312,8 @@ namespace Entities.Character {
                     }
                     var input = new Vector2(horiz, vert).normalized;
 
+                    TrySetAnimator("Run");
+
                     desVel = (runDirection * dashSpeed + input * dashNudgeSpeed).normalized * dashSpeed;
 
                     CheckChangeToJump(jumpHeld);
@@ -285,12 +324,20 @@ namespace Entities.Character {
                         ChangeState(PState.Normal);
                     }
 
+                    if(playerYVelocity > 0) {
+                        TrySetAnimator("JumpUp");
+                    } else {
+                        TrySetAnimator("Fall");
+                    }
+
                     var input = new Vector2(horiz, vert).normalized;
 
                     desVel = runDirection * jumpSpeed + input * dashNudgeSpeed;
                     break;
                 }
                 case PState.Attack: {
+                    TrySetAnimator("Idle");
+
                     if(stateTime > attackTime) {
                         ChangeState(PState.Normal);
                         CheckSwordAttack();
@@ -331,11 +378,49 @@ namespace Entities.Character {
             controller.move(velocity * Time.fixedDeltaTime);
         }
 
+        private void TrySetAnimator(string name) {
+            var dir = "_Front";
+
+            switch(curDir) {
+                case Direction.Up:
+                    dir = "_Back";
+                    break;
+                case Direction.Down:
+                    dir = "_Front";
+                    break;
+                case Direction.Left:
+                case Direction.Right:
+                    dir = "_Side";
+                    break;
+            }
+
+            name = name + dir;
+            var animState = playerAnimator.GetCurrentAnimatorStateInfo(0);
+            if(animState.IsName(name)) {
+                return;
+            }
+
+            playerAnimator.Play(name, 0, animState.normalizedTime);
+        }
+
         private void SpawnArrow() {
             var spawned = Instantiate(projectilePrefab);
             spawned.transform.position = arrowSpawnAnchor.position;
             var proj = spawned.GetComponent<Projectile>();
-            proj.SetVelocity((proj.transform.position - transform.position).normalized * baseArrowSpeed);
+            var arrowDir = Vector2.up;
+
+            switch(curDir) {
+                case Direction.Down:
+                    arrowDir = Vector2.down;
+                    break;
+                case Direction.Left:
+                    arrowDir = Vector2.left;
+                    break;
+                case Direction.Right:
+                    arrowDir = Vector2.right;
+                    break;
+            }
+            proj.SetVelocity(arrowDir * baseArrowSpeed);
 
             var arrowFx = new List<Effect>(effects.Count);
             foreach(Effect e in effects) {

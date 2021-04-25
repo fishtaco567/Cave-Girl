@@ -14,16 +14,19 @@ public class CavernGenerator : MonoBehaviour {
     protected Tilemap tilemap;
 
     [SerializeField]
+    protected Tilemap undermap;
+
+    [SerializeField]
     protected int width;
 
     [SerializeField]
     protected int height;
 
     [SerializeField]
-    protected Tile grass;
+    protected TileBase grass;
 
     [SerializeField]
-    protected Tile stone;
+    protected TileBase stone;
 
     [SerializeField]
     protected float stoneThreshhold;
@@ -32,22 +35,41 @@ public class CavernGenerator : MonoBehaviour {
     protected float circleFunctionStrength;
 
     [SerializeField]
+    protected int randomWalkLength;
+
+    [SerializeField]
+    protected float directionChangeChance;
+
+    [SerializeField]
+    protected float towardPlayerChance;
+
+    [SerializeField]
     protected Player player;
 
+    [SerializeField]
+    protected GameObject stairs;
+
+    [SerializeField]
+    protected Tile trailTile;
+
     protected TilemapHardness hardness;
+    protected SRandom rand;
 
     protected void Start() {
         hardness = tilemap.GetComponent<TilemapHardness>();
+        rand = new SRandom((uint)System.DateTime.Now.Millisecond);
         GenerateMap();
     }
 
     protected void Update() {
         if(Input.GetKeyDown(KeyCode.P)) {
-            GenerateMap();
+        //    GenerateMap();
         }
     }
 
-    protected void GenerateMap() {
+    public void GenerateMap() {
+        player = GameManager.Instance.player;
+
         var genPerlin = new GeneratorPerlin(System.DateTime.Now.Millisecond, 1, 0.5f, 0.05f, 2, 4);
         var genRidged = new GeneratorRidged(System.DateTime.Now.Millisecond + 1, 1, 0.5f, 0.05f, 2, 4);
         var genBPBil = new GeneratorBillowed(System.DateTime.Now.Millisecond + 2, 1, 0.5f, 0.05f, 2, 4);
@@ -66,8 +88,11 @@ public class CavernGenerator : MonoBehaviour {
         hardness.width = width;
         hardness.height = height;
 
-        for(int i = 0; i < width; i++) {
-            for(int j = 0; j < height; j++) {
+        TileBase[] tilesCollision = new TileBase[width * height];
+        TileBase[] tilesUnder = new TileBase[width * height];
+
+        for(int i = 0; i < width - 1; i++) {
+            for(int j = 0; j < height - 1; j++) {
                 var circleFunction = ((i - width / 2) / (float) width) * ((i - width / 2) / (float) width) + ((j - height / 2) / (float) height) * ((j - height / 2) / (float) height);
                 circleFunction *= circleFunctionStrength;
 
@@ -76,27 +101,108 @@ public class CavernGenerator : MonoBehaviour {
                 var index = i + j * width;
 
                 if(signal < stoneThreshhold) {
-                    tilemap.SetTile(new Vector3Int(i, j, 0), stone);
+                    tilesCollision[i + j * width] = stone;
+                    tilesCollision[(i + 1) + j * width] = stone;
+                    tilesCollision[i + (j + 1) * width] = stone;
+                    tilesCollision[(i + 1) + (j + 1) * width] = stone;
                     hardness.hardness[index] = 1;
-                } else {
-                    tilemap.SetTile(new Vector3Int(i, j, 0), grass);
-                    hardness.hardness[index] = 0;
+                    hardness.hardness[index + 1] = 1;
+                    hardness.hardness[index + width] = 1;
+                    hardness.hardness[index + width + 1] = 1;
+                }
+
+                tilesUnder[i + j * width] = grass;
+            }
+        }
+
+        tilemap.SetTilesBlock(new BoundsInt(0, 0, 0, width, height, 1), tilesCollision);
+        undermap.SetTilesBlock(new BoundsInt(0, 0, 0, width, height, 1), tilesUnder);
+
+        var chosenX = 100;
+        var chosenY = 100;
+        for(int i = 0; i < 20; i++) {
+            for(int j = 0; j < 20; j++) {
+                int x = 100 + i;
+                int y = 100 + j;
+
+                if(tilesCollision[x + y * width] == null) {
+                    player.transform.position = new Vector3(x + 0.5f, y + 0.5f, player.transform.position.z);
+
+                    chosenX = x;
+                    chosenY = y;
+                    break;
                 }
             }
         }
 
-        for(int i = 0; i < 10; i++) {
-            int x = 100 + i;
-            int y = 100 + i;
-            
-            if(tilemap.GetTile(new Vector3Int(x, y, 0)) == grass) {
-                player.transform.position = new Vector3(x + 0.5f, y + 0.5f, player.transform.position.z);
-                break;
-            }
-        }
+        var playerPos = new Vector2Int(chosenX, chosenY);
+        var walkPos = new Vector2Int(chosenX, chosenY);
+
+        Walk(playerPos, walkPos);
 
         player.tilemap = tilemap;
         player.hardness = hardness;
     }
+
+    public void Walk(Vector2Int playerPos, Vector2Int walkPos) {
+        Vector2Int walkDir = new Vector2Int(1, 0);
+
+        Vector2Int furtherLocation = walkPos;
+        int maxDistance = 0;
+
+        for(int i = 0; i < randomWalkLength; i++) {
+            var playerDelta = playerPos - walkPos;
+            if(hardness.hardness[(walkPos.x + walkDir.x) + (walkPos.y + walkDir.y) * width] == 0) {
+                walkPos += walkDir;
+            } else {
+                var newWalkDir = RandomDirection(walkPos, playerPos);
+                if(newWalkDir == playerDelta || walkDir == newWalkDir || walkDir == -walkDir) {
+                    walkDir = RandomDirection(walkPos, playerPos);
+                } else {
+                    walkDir = newWalkDir;
+                }
+                continue;
+            }
+
+            if(rand.RandomChance(directionChangeChance)) {
+                var newWalkDir = RandomDirection(walkPos, playerPos);
+                if(newWalkDir == playerDelta || walkDir == newWalkDir || newWalkDir == -walkDir) {
+                    walkDir = RandomDirection(walkPos, playerPos);
+                }
+            }
+
+            if(playerDelta.x + playerDelta.y > maxDistance) {
+                maxDistance = playerDelta.x + playerDelta.y;
+                furtherLocation = walkPos;
+            }
+        }
+
+        Instantiate(stairs).transform.position = new Vector3(furtherLocation.x + 0.5f, furtherLocation.y + 0.5f, -0.1f);
+    }
+
+    protected Vector2Int RandomDirection(Vector2Int curPos, Vector2Int playerPos) {
+        var randChoice = rand.RandomIntLessThan(4);
+
+        switch(randChoice) {
+            case 0:
+                return new Vector2Int(-1, 0);
+            case 1:
+                return new Vector2Int(1, 0);
+            case 2:
+                return new Vector2Int(0, -1);
+            case 3:
+                return new Vector2Int(0, 1);
+        }
+
+        return new Vector2Int(1, 0);
+    }
+
+    protected Vector2Int PrimaryDirection(Vector2Int v) {
+        if(Mathf.Abs(v.x) > Mathf.Abs(v.y)) {
+            return new Vector2Int((int)Mathf.Sign(v.x), 0);
+        } else {
+            return new Vector2Int(0, (int)Mathf.Sign(v.y));
+        }
+    } 
 
 }
