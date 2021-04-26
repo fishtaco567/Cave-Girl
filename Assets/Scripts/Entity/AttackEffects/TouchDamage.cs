@@ -46,10 +46,17 @@ namespace Entities.AttackEffects {
 
                 var res = results[i].GetComponent<Resources>();
                 
-                if(res != null) {
-                    res.Damage(damage);
-                    hasHit = true;
-                    OnHitEffects(eff, res);
+                if(res != null && res != eff.doNotHit) {
+                    if(res.Damage(damage)) {
+                        hasHit = true;
+
+                        if(eff is Projectile) {
+                            var proj = eff as Projectile;
+                            OnHitEffects(proj, -proj.GetVelocity(), res);
+                        } else {
+                            OnHitEffects(eff, res);
+                        }
+                    }
                 }
             }
 
@@ -67,6 +74,16 @@ namespace Entities.AttackEffects {
                 }
 
                 e.OnHit(eff, res);
+            }
+        }
+
+        private void OnHitEffects(Projectile proj, Vector2 norm, Resources res) {
+            foreach(Effect e in proj.effects) {
+                if(e == this) {
+                    continue;
+                }
+
+                e.OnHit(proj, norm, res);
             }
         }
 

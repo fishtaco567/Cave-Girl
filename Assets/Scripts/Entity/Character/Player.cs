@@ -107,8 +107,6 @@ namespace Entities.Character {
 
         protected Vector2 runDirection;
 
-        [SerializeField]
-        protected float playerY;
         protected float playerYVelocity;
         protected bool grounded;
 
@@ -126,6 +124,11 @@ namespace Entities.Character {
         protected Direction curDir;
         public bool isDead;
 
+        public EntityInfo info;
+
+        [SerializeField]
+        protected GameObject swordObj;
+
         public override void Start() {
             base.Start();
             
@@ -135,7 +138,7 @@ namespace Entities.Character {
 
             runDirection = Vector2.right;
 
-            playerY = 0;
+            info.yHeight = 0;
             playerYVelocity = 0;
 
             grounded = true;
@@ -171,13 +174,19 @@ namespace Entities.Character {
                 return;
             }
 
+            flags.Clear();
+
+            float scale = 1;
             foreach(Effect effect in effects) {
                 effect.PerTick(this);
+                effect.ChangeRange(this, ref scale);
             }
 
-            sprite.transform.localPosition = new Vector3(0, WorldConstants.upAspectRatio * playerY, sprite.transform.localPosition.z);
-            dropShadow.transform.localPosition = new Vector3(0, -WorldConstants.shadowAspectRatio * playerY - 0.5f, dropShadow.transform.localPosition.z);
-            dropShadow.transform.localScale = Vector3.one * (WorldConstants.shadowAspectRatio * playerY) + new Vector3(0.5f, 0.5f, 0.5f);
+            swordObj.transform.localScale = new Vector3(scale, scale, scale);
+
+            sprite.transform.localPosition = new Vector3(0, WorldConstants.upAspectRatio * info.yHeight, sprite.transform.localPosition.z);
+            dropShadow.transform.localPosition = new Vector3(0, -WorldConstants.shadowAspectRatio * info.yHeight - 0.5f, dropShadow.transform.localPosition.z);
+            dropShadow.transform.localScale = Vector3.one * (WorldConstants.shadowAspectRatio * info.yHeight) + new Vector3(0.75f, 0.75f, 0.75f);
 
             var interactPressed = rePlayer.GetButtonDown("Interact");
             if(interactPressed) {
@@ -258,12 +267,12 @@ namespace Entities.Character {
 
             stateTime += Time.fixedDeltaTime;
 
-            playerY += playerYVelocity;
+            info.yHeight += playerYVelocity;
 
-            if(playerY <= 0) {
+            if(info.yHeight <= 0) {
                 grounded = true;
                 playerYVelocity = 0;
-                playerY = 0;
+                info.yHeight = 0;
             } else {
                 grounded = false;
                 playerYVelocity -= WorldConstants.gravity * Time.fixedDeltaTime;
@@ -317,6 +326,7 @@ namespace Entities.Character {
                     desVel = (runDirection * dashSpeed + input * dashNudgeSpeed).normalized * dashSpeed;
 
                     CheckChangeToJump(jumpHeld);
+                    CheckSwordAttack();
                     break;
                 }
                 case PState.Jump: {
@@ -426,6 +436,8 @@ namespace Entities.Character {
             foreach(Effect e in effects) {
                 arrowFx.Add(e.GenerateCopy());
             }
+
+            proj.doNotHit = this.GetComponent<Resources>();
 
             proj.AddEffects(arrowFx);
         }

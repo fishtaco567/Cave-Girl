@@ -29,7 +29,7 @@ public class GameManager : Singleton<GameManager> {
     bool hasGenerated;
     float currentLevelTransitionTime;
 
-    protected float depth;
+    public float depth;
 
     public SRandom rand;
 

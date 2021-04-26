@@ -5,6 +5,8 @@ namespace Entities {
 
     public abstract class Effect : ScriptableObject {
 
+        public Sprite sprite;
+
         public virtual bool AddEffect(Effectable eff) {
             return false;
         }

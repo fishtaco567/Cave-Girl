@@ -17,6 +17,9 @@ public class CavernGenerator : MonoBehaviour {
     protected Tilemap undermap;
 
     [SerializeField]
+    protected Tilemap bad;
+
+    [SerializeField]
     protected int width;
 
     [SerializeField]
@@ -27,6 +30,18 @@ public class CavernGenerator : MonoBehaviour {
 
     [SerializeField]
     protected TileBase stone;
+
+    [SerializeField]
+    protected TileBase path;
+
+    [SerializeField]
+    protected TileBase moss;
+
+    [SerializeField]
+    protected TileBase[] decor;
+
+    [SerializeField]
+    protected TileBase[] deadly;
 
     [SerializeField]
     protected float stoneThreshhold;
@@ -55,6 +70,15 @@ public class CavernGenerator : MonoBehaviour {
     protected TilemapHardness hardness;
     protected SRandom rand;
 
+    [SerializeField]
+    protected GameObject upgradeShrinePrefab;
+
+    [SerializeField]
+    protected AnimationCurve numUpgradeShrinesPerDepth;
+
+    [SerializeField]
+    protected Effect[] possibleEffects;
+
     protected void Start() {
         hardness = tilemap.GetComponent<TilemapHardness>();
         rand = new SRandom((uint)System.DateTime.Now.Millisecond);
@@ -68,7 +92,13 @@ public class CavernGenerator : MonoBehaviour {
     }
 
     public void GenerateMap() {
+        undermap.ClearAllTiles();
+        tilemap.ClearAllTiles();
+        bad.ClearAllTiles();
+
         player = GameManager.Instance.player;
+        var genPerlinMoss = new GeneratorPerlin(System.DateTime.Now.Millisecond + 12, 1, 0.3f, 0.05f, 2, 2);
+        var genPerlinDecorger = new GeneratorPerlin(System.DateTime.Now.Millisecond + 12, 1, 0.3f, 0.05f, 2, 2);
 
         var genPerlin = new GeneratorPerlin(System.DateTime.Now.Millisecond, 1, 0.5f, 0.05f, 2, 4);
         var genRidged = new GeneratorRidged(System.DateTime.Now.Millisecond + 1, 1, 0.5f, 0.05f, 2, 4);
@@ -96,15 +126,31 @@ public class CavernGenerator : MonoBehaviour {
                 var circleFunction = ((i - width / 2) / (float) width) * ((i - width / 2) / (float) width) + ((j - height / 2) / (float) height) * ((j - height / 2) / (float) height);
                 circleFunction *= circleFunctionStrength;
 
-                var signal = generator.GetNoise2D(new Vector2(i, j)) - circleFunction;
+                var pos = new Vector2(i, j);
+                var signal = generator.GetNoise2D(pos) - circleFunction;
 
                 var index = i + j * width;
+
+                if(genPerlinMoss.GetNoise2D(pos) < -0.22f) {
+                    if(hardness.hardness[index] == 0)
+                        undermap.SetTile(new Vector3Int(i, j, 1), moss);
+                    if(hardness.hardness[index + 1] == 0)
+                        undermap.SetTile(new Vector3Int(i + 1, j, 1), moss);
+                    if(hardness.hardness[index + width] == 0)
+                        undermap.SetTile(new Vector3Int(i, j + 1, 1), moss);
+                    if(hardness.hardness[index + width + 1] == 0)
+                        undermap.SetTile(new Vector3Int(i + 1, j + 1, 1), moss);
+                }
 
                 if(signal < stoneThreshhold) {
                     tilesCollision[i + j * width] = stone;
                     tilesCollision[(i + 1) + j * width] = stone;
                     tilesCollision[i + (j + 1) * width] = stone;
                     tilesCollision[(i + 1) + (j + 1) * width] = stone;
+                    undermap.SetTile(new Vector3Int(i, j, 1), null);
+                    undermap.SetTile(new Vector3Int(i + 1, j, 1), null);
+                    undermap.SetTile(new Vector3Int(i, j + 1, 1), null);
+                    undermap.SetTile(new Vector3Int(i + 1, j + 1, 1), null);
                     hardness.hardness[index] = 1;
                     hardness.hardness[index + 1] = 1;
                     hardness.hardness[index + width] = 1;
@@ -112,6 +158,19 @@ public class CavernGenerator : MonoBehaviour {
                 }
 
                 tilesUnder[i + j * width] = grass;
+
+                var decorChance = genPerlinDecorger.GetNoise2D(pos);
+                if(decorChance < 0f) {
+                    if(rand.RandomChance(Mathf.Abs(decorChance) * 0.1f) && hardness.hardness[index] == 0) {
+                        undermap.SetTile(new Vector3Int(i, j, 2), decor[rand.RandomIntLessThan(decor.Length)]);
+                    }
+                }
+                if(decorChance > 0f) {
+                    if(rand.RandomChance(Mathf.Abs(decorChance) * 0.05f) && hardness.hardness[index] == 0) {
+                        bad.SetTile(new Vector3Int(i, j, 0), deadly[rand.RandomIntLessThan(deadly.Length)]);
+                        undermap.SetTile(new Vector3Int(i, j, 1), null);
+                    }
+                }
             }
         }
 
@@ -142,9 +201,38 @@ public class CavernGenerator : MonoBehaviour {
 
         player.tilemap = tilemap;
         player.hardness = hardness;
+
+        var numDepth = numUpgradeShrinesPerDepth.Evaluate(GameManager.Instance.depth);
+        for(int i = 0; i < numDepth; i++) {
+            TryPlaceShrine();
+        }
+    }
+
+    public void TryPlaceShrine() {
+        for(int i = 0; i < 10; i++) {
+            var chosenX = rand.RandomIntInRange(10, width - 10);
+            var chosenY = rand.RandomIntInRange(10, height - 10);
+
+            var numOcc = 0;
+            for(int j = -2; j < 2; j++) {
+                for(int k = -2; k < 0; k++) {
+                    numOcc += hardness.hardness[chosenX + j + (chosenY + k) * width];
+                }
+            }
+
+            if(numOcc == 0) {
+                var spawned = Instantiate(upgradeShrinePrefab);
+                spawned.transform.position = new Vector3(chosenX, chosenY, -2);
+                var upgrade = spawned.GetComponentInChildren<Powerup>();
+                upgrade.Setup(possibleEffects[rand.RandomIntLessThan(possibleEffects.Length)]);
+                return;
+            }
+        }
     }
 
     public void Walk(Vector2Int playerPos, Vector2Int walkPos) {
+        var genPerlin = new GeneratorPerlin(System.DateTime.Now.Millisecond + 20, 1, 0.5f, 0.08f, 2, 3);
+
         Vector2Int walkDir = new Vector2Int(1, 0);
 
         Vector2Int furtherLocation = walkPos;
@@ -174,6 +262,10 @@ public class CavernGenerator : MonoBehaviour {
             if(playerDelta.x + playerDelta.y > maxDistance) {
                 maxDistance = playerDelta.x + playerDelta.y;
                 furtherLocation = walkPos;
+            }
+
+            if(genPerlin.GetNoise2D(walkPos) < -0.2f) {
+                undermap.SetTile(new Vector3Int(walkPos.x, walkPos.y, 1), path);
             }
         }
 

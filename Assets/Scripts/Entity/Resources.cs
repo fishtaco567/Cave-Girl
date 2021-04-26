@@ -50,13 +50,17 @@ namespace Entities {
             timeSinceHit += Time.deltaTime;
         }
 
-        public void Damage(int damage) {
+        public bool Damage(int damage) {
+            if(damage == 0) {
+                return false;
+            }
+            
             if(damage != 0) {
                 OnHit?.Invoke(-damage);
             }
 
             if(timeSinceHit < iframes) {
-                return;
+                return false;
             }
 
             timeSinceHit = 0;
@@ -66,6 +70,8 @@ namespace Entities {
                 _health = 0;
                 OnDeath?.Invoke();
             }
+
+            return true;
         }
 
     }

@@ -1,0 +1,16 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b1a2ad2d49505748ae1787524c2e4f8, type: 3}
+  m_Name: SpawnExplode
+  m_EditorClassIdentifier: 
+  sprite: {fileID: -855806208316586141, guid: 6a6626dd100ab0648a4be182d57e4d4d, type: 3}
+  spawnOnHit: {fileID: 5248974965463254459, guid: fb264d93827584244a0adb45319623e2, type: 3}

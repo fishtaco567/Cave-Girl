@@ -29,6 +29,8 @@ namespace Entities {
 
         protected SRandom rand;
 
+        public EntityInfo info;
+
         public override void Start() {
             base.Start();
 
@@ -50,6 +52,7 @@ namespace Entities {
         }
 
         protected virtual void Update() {
+            flags.Clear();
             foreach(Effect e in effects) {
                 e.PerTick(this);
             }

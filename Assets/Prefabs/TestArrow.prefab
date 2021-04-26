@@ -98,11 +98,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   effects:
   - {fileID: 11400000, guid: 09762c9ff2560434c8b59cc435c4ef3f, type: 2}
+  doNotHit: {fileID: 0}
   hitMask:
     serializedVersion: 2
     m_Bits: 1
   velocity: {x: 0, y: 0}
   spawnOnDeath: {fileID: 0}
+  dieAfter: 10000
+  time: 0
 --- !u!61 &278313923863215779
 BoxCollider2D:
   m_ObjectHideFlags: 0

@@ -7,25 +7,35 @@ namespace Entities {
         [SerializeField]
         public List<Effect> effects;
 
+        [SerializeField]
+        public Dictionary<string, bool> flags;
+
+        public Resources doNotHit;
+
         public abstract void Destroy();
 
         public virtual void Start() {
+            flags = new Dictionary<string, bool>();
+
             var instEffects = new List<Effect>(effects.Count);
 
             foreach(Effect e in effects) {
                 instEffects.Add(Instantiate(e));
+                e.AddEffect(this);
             }
 
             effects = instEffects;
         }
 
         public void AddEffect(Effect newEffect) {
-            effects.Add(newEffect);
+            effects.Insert(0, newEffect);
+            newEffect.AddEffect(this);
         }
 
         public void AddEffects(List<Effect> newEffects) {
             foreach(Effect e in newEffects) {
-                effects.Add(e);
+                effects.Insert(0, e);
+                e.AddEffect(this);
             }
         }
 
