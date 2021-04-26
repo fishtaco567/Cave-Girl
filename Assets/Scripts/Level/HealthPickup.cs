@@ -12,6 +12,10 @@ public class HealthPickup : MonoBehaviour {
 
     protected Collider2D[] results;
 
+    [SerializeField]
+    protected GameObject toSpawn;
+
+
     public void Start() {
         results = new Collider2D[3];
     }
@@ -22,6 +26,8 @@ public class HealthPickup : MonoBehaviour {
         for(int i = 0; i < num; i++) {
             var res = results[i].GetComponent<Entities.Resources>();
             res.Health += 1;
+
+            Instantiate(toSpawn).transform.position = transform.position;
 
             Destroy(this.gameObject);
         }

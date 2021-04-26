@@ -188,6 +188,7 @@ MonoBehaviour:
     maxNormalAngle: 0
   effect: {fileID: 11400000, guid: 45afd74b27d7ad541807b8aaa99b9275, type: 2}
   sr: {fileID: 2175108696993859667}
+  toSpawn: {fileID: 4349811286469630955, guid: cf5afbddf80224e4481b799619f38e58, type: 3}
 --- !u!212 &2175108696993859667
 SpriteRenderer:
   m_ObjectHideFlags: 0

@@ -138,3 +138,4 @@ MonoBehaviour:
     minNormalAngle: 0
     maxNormalAngle: 0
   minMaxNum: {x: 2, y: 5}
+  toSpawn: {fileID: 4349811286469630955, guid: cf5afbddf80224e4481b799619f38e58, type: 3}

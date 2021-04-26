@@ -22,7 +22,9 @@ namespace Entities {
             }
             set {
                 if(value < 0) {
-                    OnDeath?.Invoke();
+                    if(_health != 0) {
+                        OnDeath?.Invoke();
+                    }
                     _health = 0;
                     return;
                 }
@@ -51,16 +53,20 @@ namespace Entities {
         }
 
         public bool Damage(int damage) {
-            if(damage == 0) {
+            if(_health == 0) {
                 return false;
             }
-            
-            if(damage != 0) {
-                OnHit?.Invoke(-damage);
+
+            if(damage == 0) {
+                return false;
             }
 
             if(timeSinceHit < iframes) {
                 return false;
+            }
+
+            if(damage != 0) {
+                OnHit?.Invoke(-damage);
             }
 
             timeSinceHit = 0;

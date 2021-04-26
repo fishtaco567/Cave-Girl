@@ -78,6 +78,8 @@ public class CavernGenerator : MonoBehaviour {
 
     [SerializeField]
     protected Effect[] possibleEffects;
+    [SerializeField]
+    protected float[] possibleEffectWeights;
 
     [SerializeField]
     protected GameObject holder;
@@ -91,10 +93,40 @@ public class CavernGenerator : MonoBehaviour {
     [SerializeField]
     protected Vector2Int numBombPickup;
 
+    [SerializeField]
+    protected GameObject waterPickup;
+
+    [SerializeField]
+    protected AnimationCurve numWaterPickups;
+    [SerializeField]
+    protected AnimationCurve chanceWaterPickup;
+
+    [SerializeField]
+    protected Color[] colorsPer200;
+
+    [SerializeField]
+    protected AnimationCurve perlinRoughness;
+    [SerializeField]
+    protected AnimationCurve ridgedRoughness;
+    [SerializeField]
+    protected AnimationCurve bpRoughness;
+
+    [SerializeField]
+    protected AnimationCurve perlinFreqSc;
+    [SerializeField]
+    protected AnimationCurve ridgedFreqSc;
+    [SerializeField]
+    protected AnimationCurve bpFreqSc;
+    [SerializeField]
+    protected AnimationCurve blend1FreqSc;
+    [SerializeField]
+    protected AnimationCurve blend2FreqSc;
+
+    protected Utils.GrabBag<Effect> powerupBag;
+
     protected void Start() {
         hardness = tilemap.GetComponent<TilemapHardness>();
         rand = new SRandom((uint)System.DateTime.Now.Millisecond);
-        GenerateMap();
     }
 
     protected void Update() {
@@ -111,18 +143,49 @@ public class CavernGenerator : MonoBehaviour {
         spawner.holder = holder;
         GameManager.Instance.holder = holder;
 
+        powerupBag = new Utils.GrabBag<Effect>();
+        powerupBag.AddItems(possibleEffects, possibleEffectWeights);
+
         undermap.ClearAllTiles();
         tilemap.ClearAllTiles();
         bad.ClearAllTiles();
+
+        int colorIndex = (int) (GameManager.Instance.depth / 200f);
+        colorIndex = Mathf.Min(colorIndex, colorsPer200.Length - 1);
+        var color = colorsPer200[colorIndex];
+
+        tilemap.color = color;
+        undermap.color = color;
 
         player = GameManager.Instance.player;
         var genPerlinMoss = new GeneratorPerlin(System.DateTime.Now.Millisecond + 12, 1, 0.3f, 0.05f, 2, 2);
         var genPerlinDecorger = new GeneratorPerlin(System.DateTime.Now.Millisecond + 12, 1, 0.3f, 0.05f, 2, 2);
 
-        var genPerlin = new GeneratorPerlin(System.DateTime.Now.Millisecond, 1, 0.5f, 0.05f, 2, 4);
-        var genRidged = new GeneratorRidged(System.DateTime.Now.Millisecond + 1, 1, 0.5f, 0.05f, 2, 4);
-        var genBPBil = new GeneratorBillowed(System.DateTime.Now.Millisecond + 2, 1, 0.5f, 0.05f, 2, 4);
-        var genBPRidge = new GeneratorRidged(System.DateTime.Now.Millisecond + 3, 1, 0.5f, 0.05f, 2, 4);
+        var depth = GameManager.Instance.depth;
+
+        float perlinFreq = 0.05f * perlinFreqSc.Evaluate(depth);
+        var pr = perlinRoughness.Evaluate(depth);
+        float perlinFreqMulti = 2f * pr;
+        float perlinPersistence = 0.5f * pr;
+
+        float ridgedFreq = 0.05f * ridgedFreqSc.Evaluate(depth);
+        var rr = ridgedRoughness.Evaluate(depth);
+        float ridgedFreqMulti = 2f * rr;
+        float ridgedPersistence = 0.5f * rr;
+
+        float bpFreq = 0.05f * bpFreqSc.Evaluate(depth);
+        var bpr = bpRoughness.Evaluate(depth);
+        float bpFreqMulti = 2f * bpr;
+        float bpPersistence = 0.5f * bpr;
+
+        float blend1Freq = 0.02f * blend1FreqSc.Evaluate(depth);
+
+        float blend2Freq = 0.03f * blend2FreqSc.Evaluate(depth);
+
+        var genPerlin = new GeneratorPerlin(System.DateTime.Now.Millisecond, 1, perlinPersistence, perlinFreq, perlinFreqMulti, 4);
+        var genRidged = new GeneratorRidged(System.DateTime.Now.Millisecond + 1, 1, ridgedPersistence, ridgedFreq, ridgedFreqMulti, 4);
+        var genBPBil = new GeneratorBillowed(System.DateTime.Now.Millisecond + 2, 1, bpPersistence, bpFreq, bpFreqMulti, 4);
+        var genBPRidge = new GeneratorRidged(System.DateTime.Now.Millisecond + 3, 1, bpPersistence, bpFreq, bpFreqMulti, 4);
 
         var genBP = new GeneratorDivide(new GeneratorAdd(genBPBil, genBPRidge), new GeneratorConstant(2f));
 
@@ -203,7 +266,15 @@ public class CavernGenerator : MonoBehaviour {
                 int x = 100 + i;
                 int y = 100 + j;
 
-                if(tilesCollision[x + y * width] == null) {
+                int col = 0;
+
+                for(int ii = -1; ii <= 1; ii++) {
+                    for(int jj = -1; jj <= 1; jj++) {
+                        col += hardness.hardness[x + ii + (y + jj) * width];
+                    }
+                }
+
+                if(bad.GetTile(new Vector3Int(x, y, 0)) == null && col == 0) {
                     player.transform.position = new Vector3(x + 0.5f, y + 0.5f, -5f);
 
                     chosenX = x;
@@ -230,10 +301,17 @@ public class CavernGenerator : MonoBehaviour {
         for(int i = 0; i < numBomb; i++) {
             TryPlaceBomb();
         }
+
+        var numWater = Mathf.CeilToInt(numWaterPickups.Evaluate(GameManager.Instance.depth));
+        for(int i = 0; i < numWater; i++) {
+            if(rand.RandomChance(chanceWaterPickup.Evaluate(GameManager.Instance.depth))) {
+                TryPlaceWater();
+            }
+        }
     }
 
     public void TryPlaceShrine() {
-        for(int i = 0; i < 10; i++) {
+        for(int i = 0; i < 30; i++) {
             var chosenX = rand.RandomIntInRange(10, width - 10);
             var chosenY = rand.RandomIntInRange(10, height - 10);
 
@@ -249,14 +327,14 @@ public class CavernGenerator : MonoBehaviour {
                 spawned.transform.parent = holder.transform;
                 spawned.transform.position = new Vector3(chosenX, chosenY, -3);
                 var upgrade = spawned.GetComponentInChildren<Powerup>();
-                upgrade.Setup(possibleEffects[rand.RandomIntLessThan(possibleEffects.Length)]);
+                upgrade.Setup(powerupBag.GetItem());
                 return;
             }
         }
     }
 
     public void TryPlaceBomb() {
-        for(int i = 0; i < 10; i++) {
+        for(int i = 0; i < 30; i++) {
             var chosenX = rand.RandomIntInRange(10, width - 10);
             var chosenY = rand.RandomIntInRange(10, height - 10);
 
@@ -264,6 +342,22 @@ public class CavernGenerator : MonoBehaviour {
 
             if(numOcc == 0) {
                 var spawned = Instantiate(bombsPickup);
+                spawned.transform.parent = holder.transform;
+                spawned.transform.position = new Vector3(chosenX, chosenY + 0.5f, -3);
+                return;
+            }
+        }
+    }
+
+    public void TryPlaceWater() {
+        for(int i = 0; i < 30; i++) {
+            var chosenX = rand.RandomIntInRange(10, width - 10);
+            var chosenY = rand.RandomIntInRange(10, height - 10);
+
+            var numOcc = hardness.hardness[chosenX - 1 + (chosenY) * width];
+
+            if(numOcc == 0) {
+                var spawned = Instantiate(waterPickup);
                 spawned.transform.parent = holder.transform;
                 spawned.transform.position = new Vector3(chosenX, chosenY + 0.5f, -3);
                 return;

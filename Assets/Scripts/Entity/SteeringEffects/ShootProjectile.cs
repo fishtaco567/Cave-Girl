@@ -78,6 +78,7 @@ namespace Entities.Steering {
             var proj = spawned.GetComponent<Projectile>();
             if(proj != null) {
                 proj.SetVelocity(direction * speed);
+                proj.doNotHitLayers = enemy.gameObject.layer;
                 proj.doNotHit = enemy.GetComponent<Resources>();
             }
         }

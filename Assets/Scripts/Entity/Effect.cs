@@ -51,6 +51,10 @@ namespace Entities {
             return false;
         }
 
+        public virtual bool ShouldPickup(Effectable eff) {
+            return true;
+        }
+
         public abstract Effect GenerateCopy();
 
     }

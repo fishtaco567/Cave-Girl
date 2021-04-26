@@ -97,6 +97,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   effects: []
+  doNotHit: {fileID: 0}
   range: 4
   timeToExplode: 1.5
   currentTime: 0
@@ -118,6 +119,7 @@ MonoBehaviour:
   strength: 2
   smokeToSpawn: {fileID: 7294951767567983718, guid: 0e0793afae7725048bdbdedb8919e089, type: 3}
   results: []
+  spawnOnDeath: {fileID: 7109969638568910181, guid: 8976da94eb3ffde40a24a5fd28b3b4de, type: 3}
 --- !u!95 &6114401286312337353
 Animator:
   serializedVersion: 3

@@ -22,6 +22,9 @@ namespace Entities.AttackEffects {
             var num = Physics2D.OverlapCircle(proj.transform.position, range, filter, results);
 
             for(int i = 0; i < num; i++) {
+                if(results[i].gameObject.layer == proj.doNotHitLayers) {
+                    continue;
+                }
                 var resources = results[i].GetComponent<Resources>();
                 if(resources != null && resources == proj.doNotHit) {
                     continue;

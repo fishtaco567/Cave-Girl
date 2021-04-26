@@ -19,8 +19,8 @@ namespace Entities
             resources.OnDeath += OnDeath;
         }
 
-        protected void OnDeath()
-        {
+        protected void OnDeath() {
+            Debug.Log("S2");
             if(smokePrefab != null && GameManager.Instance.rand.RandomChance(chance)) {
                 var smoke = Instantiate(smokePrefab);
                 smoke.transform.position = transform.position;

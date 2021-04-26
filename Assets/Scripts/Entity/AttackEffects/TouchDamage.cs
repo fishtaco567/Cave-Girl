@@ -40,6 +40,9 @@ namespace Entities.AttackEffects {
             bool hasHit = false;
 
             for(int i = 0; i < num; i++) {
+                if(results[i].gameObject.layer == eff.doNotHitLayers) {
+                    continue;
+                }
                 if(results[i].gameObject == eff.gameObject) {
                     continue;
                 }

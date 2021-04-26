@@ -6,12 +6,20 @@ public class BasicEnemySpawner : MonoBehaviour {
 
     [SerializeField]
     protected List<GameObject> enemies;
+    [SerializeField]
+    protected List<int> enemyIndex;
+    [SerializeField]
+    protected List<float> enemyWeights;
 
     [SerializeField]
     protected List<Entities.SteeringEffect> steerings;
+    [SerializeField]
+    protected List<float> steeringWeights;
 
     [SerializeField]
     protected List<Entities.Effect> effects;
+    [SerializeField]
+    protected List<float> effectWeights;
 
     [SerializeField]
     protected AnimationCurve steeringsPerDepth;
@@ -29,11 +37,21 @@ public class BasicEnemySpawner : MonoBehaviour {
 
     private SRandom rand;
 
+    private Utils.GrabBag<Entities.SteeringEffect> steeringBag;
+    private Utils.GrabBag<Entities.Effect> effectBag;
+    private Utils.GrabBag<int> enemyBag;
+
     protected void Start() {
         rand = new SRandom((uint) System.DateTime.Now.Millisecond);
+        enemyBag = new GrabBag<int>();
+        enemyBag.AddItems(enemyIndex, enemyWeights);
     }
 
     protected void Update() {
+        if(GameManager.Instance.inGame == false) {
+            return;
+        }
+
         if(rand.RandomChance(spawnChancePerSecondPerDepth.Evaluate(GameManager.Instance.depth) * Time.deltaTime * 5)) {
             TrySpawn();
         }
@@ -68,41 +86,35 @@ public class BasicEnemySpawner : MonoBehaviour {
     }
 
     protected void DoSpawn(Vector3 pos) {
-        var maxEnemyIndex = (int) (GameManager.Instance.depth / 100f);
-        maxEnemyIndex = Mathf.Clamp(maxEnemyIndex, 1, enemies.Count - 1);
+        var effectBag = new GrabBag<Entities.Effect>(true);
+        effectBag.AddItems(effects, effectWeights);
+        steeringBag = new GrabBag<Entities.SteeringEffect>(true);
+        steeringBag.AddItems(steerings, steeringWeights);
 
-        var enemy = enemies[rand.RandomIntLessThan(maxEnemyIndex)];
+        var maxEnemyIndex = (int) (GameManager.Instance.depth / 100f);
+        maxEnemyIndex = Mathf.Clamp(maxEnemyIndex, 0, enemies.Count - 1);
+
+        var enemy = enemies[Mathf.Clamp(enemyBag.GetItem(), 0, maxEnemyIndex)];
         var numSteerings = rand.RandomIntLessThan((int) steeringsPerDepth.Evaluate(GameManager.Instance.depth));
         var numEffects = rand.RandomIntLessThan((int)effectsPerDepth.Evaluate(GameManager.Instance.depth));
 
         var spawned = Instantiate(enemy);
         var enem = spawned.GetComponent<Entities.BasicEnemy>();
 
-        var copiedSteerings = new List<Entities.SteeringEffect>(steerings);
-        var copiedEffects = new List<Entities.Effect>(effects);
-
         for(int i = 0; i < numSteerings; i++) {
-            if(copiedSteerings.Count == 0) {
+            if(steeringBag.IsEmpty()) {
                 break;
             }
 
-            var chosen = rand.RandomIntLessThan(copiedSteerings.Count);
-            var steering = copiedSteerings[chosen];
-            copiedSteerings.RemoveAt(chosen);
-
-            enem.AddSteering(steering);
+            enem.AddSteering(steeringBag.GetItem());
         }
 
         for(int i = 0; i < numEffects; i++) {
-            if(copiedEffects.Count == 0) {
+            if(effectBag.IsEmpty()) {
                 break;
             }
 
-            var chosen = rand.RandomIntLessThan(copiedEffects.Count);
-            var effect = copiedEffects[chosen];
-            copiedEffects.RemoveAt(chosen);
-
-            enem.AddEffect(effect);
+            enem.AddEffect(effectBag.GetItem());
         }
 
         spawned.transform.position = pos;

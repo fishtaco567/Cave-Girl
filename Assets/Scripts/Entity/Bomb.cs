@@ -33,6 +33,9 @@ namespace Entities {
         protected Tilemap tilemap;
         protected TilemapHardness hardness;
 
+        [SerializeField]
+        protected GameObject spawnOnDeath;
+
         public override void Start() {
             currentTime = 0;
 
@@ -102,6 +105,8 @@ namespace Entities {
                     }
                 }
             }
+
+            Instantiate(spawnOnDeath).transform.position = transform.position;
 
             Destroy(this.gameObject);
         }

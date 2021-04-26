@@ -102,6 +102,31 @@ namespace Entities.Character {
         [SerializeField]
         protected float chanceLosePowerupOnHit;
 
+        [Header("Audio")]
+
+        [SerializeField]
+        protected AudioSource jump;
+
+        [SerializeField]
+        protected AudioSource die;
+
+        [SerializeField]
+        protected AudioSource shoot;
+
+        [SerializeField]
+        protected AudioSource sword;
+
+        [SerializeField]
+        protected AudioSource takeDamage;
+
+        [SerializeField]
+        protected AudioSource losePowerup;
+
+        [SerializeField]
+        protected AudioSource pullBack;
+
+        public int water;
+
         [Header("State")]
         [SerializeField]
         protected Vector2 velocity;
@@ -116,7 +141,7 @@ namespace Entities.Character {
         public Tilemap tilemap;
         public TilemapHardness hardness;
 
-        protected Rewired.Player rePlayer;
+        public Rewired.Player rePlayer;
 
         protected Collider2D[] results;
         protected ContactFilter2D interactFilter;
@@ -138,6 +163,9 @@ namespace Entities.Character {
 
         public int curBombs;
 
+        public float moisture;
+
+        public AnimationCurve lessMoisturePerSecond;
 
         public override void Start() {
             base.Start();
@@ -187,16 +215,29 @@ namespace Entities.Character {
 
             if(rand.RandomChance(chanceLosePowerupOnHit * Mathf.Abs(damage)) && effects.Count != 0) {
                 effects.RemoveAt(rand.RandomIntLessThan(effects.Count));
+                losePowerup.Play();
             }
+
+            takeDamage.Play();
         }
 
         public void OnDeath() {
+            die.Play();
             GameManager.Instance.OnDeath();
         }
 
         protected void Update() {
-            if(isDead) {
+            if(isDead || GameManager.Instance.inGame == false) {
+                if(isDead) {
+                    TrySetAnimator("Die");
+                }
                 return;
+            }
+
+            moisture -= lessMoisturePerSecond.Evaluate(GameManager.Instance.depth) * Time.deltaTime;
+            if(moisture <= 0) {
+                moisture = 0;
+                OnDeath();
             }
 
             flags.Clear();
@@ -237,12 +278,14 @@ namespace Entities.Character {
             if(swordPressed && state != PState.Attack) {
                 ChangeState(PState.Attack);
                 swordAnimator.SetTrigger("Attack");
+                sword.Play();
             }
 
             var bowPressed = rePlayer.GetButtonDown("Bow");
             if(bowPressed && state != PState.HoldingBow) {
                 ChangeState(PState.HoldingBow);
                 bowAnimator.SetBool("HeldBack", true);
+                pullBack.Play();
             }
             
             if(Mathf.Abs(velocity.x) > 0.1f || Mathf.Abs(velocity.y) > 0.1f) {
@@ -278,7 +321,7 @@ namespace Entities.Character {
         }
 
         protected void FixedUpdate() {
-            if(isDead) {
+            if(isDead || GameManager.Instance.inGame == false) {
                 return;
             }
 
@@ -386,6 +429,8 @@ namespace Entities.Character {
                     break;
                 }
                 case PState.HoldingBow: {
+                    TrySetAnimator("DashCharge");
+
                     if(Mathf.Abs(horiz) > 0.1f || Mathf.Abs(vert) > 0.1f) {
                         if(Mathf.Abs(horiz) > Mathf.Abs(vert)) {
                             curDir = horiz < 0 ? Direction.Left : Direction.Right;
@@ -445,6 +490,7 @@ namespace Entities.Character {
         }
 
         private void SpawnArrow() {
+            shoot.Play();
             var spawned = Instantiate(projectilePrefab);
             spawned.transform.position = arrowSpawnAnchor.position;
             spawned.transform.parent = GameManager.Instance.holder.transform;
@@ -495,6 +541,7 @@ namespace Entities.Character {
 
         private void CheckChangeToJump(bool jump) {
             if(jump) {
+                this.jump.Play();
                 ChangeState(PState.Jump);
                 playerYVelocity = jumpYSpeed;
 

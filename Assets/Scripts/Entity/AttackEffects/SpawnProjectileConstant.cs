@@ -25,7 +25,13 @@ namespace Entities.AttackEffects {
         }
 
         public override bool PerTick(Effectable eff) {
-            time += Time.deltaTime;
+            var dt = Time.deltaTime;
+            foreach(Effect e in eff.effects) {
+                e.ChangeTime(eff, ref dt);
+            }
+
+            time += dt;
+
             if(time < delayBetween) {
                 return false;
             }
@@ -48,6 +54,7 @@ namespace Entities.AttackEffects {
                 if(newProj != null) {
                     newProj.AddEffects(effectsToTransfer);
                     newProj.doNotHit = eff.GetComponent<Resources>();
+                    newProj.doNotHitLayers = eff.gameObject.layer;
                     newProj.SetVelocity(velocity * speed);
                 }
 

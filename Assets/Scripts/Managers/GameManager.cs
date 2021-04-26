@@ -32,6 +32,10 @@ public class GameManager : Singleton<GameManager> {
 
     [SerializeField]
     protected GameObject playerPrefab;
+    [SerializeField]
+    protected AudioSource fall1;
+    [SerializeField]
+    protected AudioSource fall2;
 
     bool hasShownScreen;
     bool hasGenerated;
@@ -53,8 +57,27 @@ public class GameManager : Singleton<GameManager> {
 
     public GameObject holder;
 
+    public bool inGame;
+
+    [SerializeField]
+    protected GameObject mainMenu;
+
+    [SerializeField]
+    protected GameObject controls;
+    [SerializeField]
+    protected GameObject pauseMenu;
+
+    [SerializeField]
+    protected bool inGameMenu;
+
+    [SerializeField]
+    protected UnityEngine.UI.Slider moisture;
+    [SerializeField]
+    protected TMPro.TMP_Text moistureText;
+
     // Use this for initialization
     void Start() {
+        inGame = false;
         hasShownScreen = true;
         hasGenerated = true;
         currentLevelTransitionTime = delayToGenerate + 1;
@@ -62,10 +85,28 @@ public class GameManager : Singleton<GameManager> {
         rand = new SRandom((uint)System.DateTime.Now.Millisecond);
         inDeathScene = false;
         shouldRespawnPlayer = false;
+        inGameMenu = false;
     }
 
     // Update is called once per frame
     void Update() {
+        if(inGame && !player.isDead) {
+            var pausePressed = player.rePlayer.GetButtonDown("Pause");
+
+            if(pausePressed) {
+                if(inGameMenu) {
+                    inGameMenu = false;
+                    controls.SetActive(false);
+                    pauseMenu.SetActive(false);
+                    Time.timeScale = 1;
+                } else {
+                    inGameMenu = true;
+                    pauseMenu.SetActive(true);
+                    Time.timeScale = 0;
+                }
+            }
+        }
+
         inGameDepthText.text = string.Format("Depth: {0, 0:F2} meters", depth);
         for(int i = 0; i < upgrades.Length; i++) {
             if(i < player.effects.Count) {
@@ -104,6 +145,8 @@ public class GameManager : Singleton<GameManager> {
             healthBar.value = playerRes.Health / (float)playerRes.maxHealth;
             healthText.text = playerRes.Health + " / " + playerRes.maxHealth;
             bombText.text = "Bombs: " + player.curBombs + " / " + player.maxBombs;
+            moisture.value = Mathf.Min(player.moisture, 1);
+            moistureText.text = string.Format("Moisture: {0, 0:F1}<i>%</i>", player.moisture * 100);
         }
     }
 
@@ -111,7 +154,9 @@ public class GameManager : Singleton<GameManager> {
         hasShownScreen = false;
         hasGenerated = false;
         currentLevelTransitionTime = 0;
-        depth += rand.RandomFloatInRange(13, 76);
+        depth += rand.RandomFloatInRange(52, 76);
+        fall1.Play();
+        fall2.Play();
     }
 
     public void OnDeath() {
@@ -128,7 +173,37 @@ public class GameManager : Singleton<GameManager> {
     }
 
     public void Exit() {
-        Debug.Log("Exit Pressed WIP");
+        inGame = false;
+        Time.timeScale = 1;
+        controls.SetActive(false);
+        pauseMenu.SetActive(false);
+        mainMenu.SetActive(true);
+    }
+
+    public void StartPress() {
+        inGame = true;
+        loadingScreen.SetActive(true);
+        shouldRespawnPlayer = true;
+        mainMenu.SetActive(false);
+        NextLevel();
+    }
+
+    public void ControlPress() {
+        controls.SetActive(true);
+    }
+    
+    public void ControlBackPress() {
+        controls.SetActive(false);
+    }
+
+    public void ResumePress() {
+        controls.SetActive(false);
+        pauseMenu.SetActive(false);
+        Time.timeScale = 1;
+    }
+
+    public void QuitPress() {
+        Application.Quit();
     }
 
 }

@@ -18,6 +18,10 @@ public class Powerup : MonoBehaviour {
     [SerializeField]
     protected SpriteRenderer sr;
 
+    [SerializeField]
+    protected GameObject toSpawn;
+
+
     public void Start() {
         results = new Collider2D[3];
     }
@@ -34,6 +38,8 @@ public class Powerup : MonoBehaviour {
             var eff = results[i].GetComponent<Effectable>();
             if(eff != null) {
                 eff.AddEffect(effect);
+
+                Instantiate(toSpawn).transform.position = transform.position;
 
                 Destroy(this.gameObject); 
             }

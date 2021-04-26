@@ -12,6 +12,8 @@ namespace Entities {
 
         public Resources doNotHit;
 
+        public LayerMask doNotHitLayers;
+
         public abstract void Destroy();
 
         public virtual void Start() {

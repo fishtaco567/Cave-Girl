@@ -25,7 +25,16 @@ namespace Entities.AttackEffects {
         }
 
         public override bool VelocityTick(Projectile eff, ref Vector2 inVelocity) {
-            time += Time.deltaTime;
+            if(inVelocity.sqrMagnitude == 0) {
+                return false;
+            }
+
+            var dt = Time.deltaTime;
+            foreach(Effect e in eff.effects) {
+                e.ChangeTime(eff, ref dt);
+            }
+
+            time += dt;
             if(time < delayBetween) {
                 return false;
             }
@@ -44,6 +53,7 @@ namespace Entities.AttackEffects {
                 if(newProj != null) {
                     newProj.AddEffects(effectsToTransfer);
                     newProj.doNotHit = eff.GetComponent<Resources>();
+                    newProj.doNotHitLayers = eff.gameObject.layer;
                     newProj.SetVelocity(velocity * speed);
                 }
 

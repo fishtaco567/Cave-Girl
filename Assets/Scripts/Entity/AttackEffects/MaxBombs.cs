@@ -31,6 +31,15 @@ namespace Entities.AttackEffects {
             return true;
         }
 
+        public override bool ShouldPickup(Effectable eff) {
+            var res = eff.GetComponent<Entities.Character.Player>();
+            if(res != null) {
+                return true;
+            }
+
+            return false;
+        }
+
         public override Effect GenerateCopy() {
             return Instantiate(this);
         }

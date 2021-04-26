@@ -14,6 +14,9 @@ public class BombPile : MonoBehaviour {
 
     public Vector2Int minMaxNum;
 
+    [SerializeField]
+    protected GameObject toSpawn;
+
     public void Start() {
         results = new Collider2D[3];
     }
@@ -25,6 +28,8 @@ public class BombPile : MonoBehaviour {
             var res = results[i].GetComponent<Entities.Character.Player>();
             res.curBombs += GameManager.Instance.rand.RandomIntInRange(minMaxNum.x, minMaxNum.y);
             res.curBombs = Mathf.Min(res.maxBombs, res.curBombs);
+
+            Instantiate(toSpawn).transform.position = transform.position;
 
             Destroy(this.gameObject);
         }
