@@ -99,6 +99,9 @@ namespace Entities.Character {
         [SerializeField]
         protected float baseArrowSpeed;
 
+        [SerializeField]
+        protected float chanceLosePowerupOnHit;
+
         [Header("State")]
         [SerializeField]
         protected Vector2 velocity;
@@ -129,9 +132,18 @@ namespace Entities.Character {
         [SerializeField]
         protected GameObject swordObj;
 
+        protected Utils.SRandom rand;
+
+        public int maxBombs;
+
+        public int curBombs;
+
+
         public override void Start() {
             base.Start();
-            
+
+            rand = new Utils.SRandom((uint)System.DateTime.Now.Millisecond);
+
             velocity = Vector2.zero;
             state = PState.Normal;
             stateTime = 0;
@@ -140,6 +152,8 @@ namespace Entities.Character {
 
             info.yHeight = 0;
             playerYVelocity = 0;
+
+            curBombs = maxBombs;
 
             grounded = true;
 
@@ -161,8 +175,19 @@ namespace Entities.Character {
 
             isDead = false;
 
-            GetComponent<Resources>().OnDeath += OnDeath;
+            var res = GetComponent<Resources>();
+            res.OnDeath += OnDeath;
+            res.OnHit += OnHit;
+        }
 
+        public void OnHit(int damage) {          
+            if(damage > 0) {
+                return;
+            }
+
+            if(rand.RandomChance(chanceLosePowerupOnHit * Mathf.Abs(damage)) && effects.Count != 0) {
+                effects.RemoveAt(rand.RandomIntLessThan(effects.Count));
+            }
         }
 
         public void OnDeath() {
@@ -198,7 +223,8 @@ namespace Entities.Character {
 
             var bombPressed = rePlayer.GetButtonDown("Bomb");
             timeSinceLastBomb += Time.deltaTime;
-            if(bombPressed && timeSinceLastBomb > bombDelay) {
+            if(bombPressed && timeSinceLastBomb > bombDelay && curBombs > 0) {
+                curBombs--;
                 timeSinceLastBomb = 0;
                 var spawned = Instantiate(bombPrefab);
                 spawned.transform.position = transform.position;
@@ -256,6 +282,11 @@ namespace Entities.Character {
                 return;
             }
 
+            float dt = Time.fixedDeltaTime;
+            foreach(Effect e in effects) {
+                e.ChangeTime(this, ref dt);
+            }
+
             var horiz = rePlayer.GetAxis("Horizontal");
             var vert = rePlayer.GetAxis("Vertical");
 
@@ -275,7 +306,7 @@ namespace Entities.Character {
                 info.yHeight = 0;
             } else {
                 grounded = false;
-                playerYVelocity -= WorldConstants.gravity * Time.fixedDeltaTime;
+                playerYVelocity -= WorldConstants.gravity * dt;
             }
 
             switch(state) {
@@ -385,7 +416,7 @@ namespace Entities.Character {
             }
 
             velocity += delta;
-            controller.move(velocity * Time.fixedDeltaTime);
+            controller.move(velocity * dt);
         }
 
         private void TrySetAnimator(string name) {
@@ -416,6 +447,7 @@ namespace Entities.Character {
         private void SpawnArrow() {
             var spawned = Instantiate(projectilePrefab);
             spawned.transform.position = arrowSpawnAnchor.position;
+            spawned.transform.parent = GameManager.Instance.holder.transform;
             var proj = spawned.GetComponent<Projectile>();
             var arrowDir = Vector2.up;
 

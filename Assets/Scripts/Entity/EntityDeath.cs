@@ -10,6 +10,8 @@ namespace Entities
 
         protected Resources resources;
 
+        public float chance;
+
         // Use this for initialization
         void Start()
         {
@@ -19,9 +21,10 @@ namespace Entities
 
         protected void OnDeath()
         {
-            if(smokePrefab != null) {
+            if(smokePrefab != null && GameManager.Instance.rand.RandomChance(chance)) {
                 var smoke = Instantiate(smokePrefab);
                 smoke.transform.position = transform.position;
+                smoke.transform.parent = GameManager.Instance.holder.transform;
             }
             Destroy(this.gameObject);
         }

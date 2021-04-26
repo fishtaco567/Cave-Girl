@@ -19,7 +19,7 @@ public class Powerup : MonoBehaviour {
     protected SpriteRenderer sr;
 
     public void Start() {
-        results = new Collider2D[1];
+        results = new Collider2D[3];
     }
 
     public void Setup(Effect e) {

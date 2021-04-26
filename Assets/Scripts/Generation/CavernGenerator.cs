@@ -79,6 +79,18 @@ public class CavernGenerator : MonoBehaviour {
     [SerializeField]
     protected Effect[] possibleEffects;
 
+    [SerializeField]
+    protected GameObject holder;
+
+    [SerializeField]
+    protected BasicEnemySpawner spawner;
+
+    [SerializeField]
+    protected GameObject bombsPickup;
+
+    [SerializeField]
+    protected Vector2Int numBombPickup;
+
     protected void Start() {
         hardness = tilemap.GetComponent<TilemapHardness>();
         rand = new SRandom((uint)System.DateTime.Now.Millisecond);
@@ -92,6 +104,13 @@ public class CavernGenerator : MonoBehaviour {
     }
 
     public void GenerateMap() {
+        if(holder != null) {
+            GameObject.Destroy(holder);
+        }
+        holder = new GameObject("Holder");
+        spawner.holder = holder;
+        GameManager.Instance.holder = holder;
+
         undermap.ClearAllTiles();
         tilemap.ClearAllTiles();
         bad.ClearAllTiles();
@@ -185,7 +204,7 @@ public class CavernGenerator : MonoBehaviour {
                 int y = 100 + j;
 
                 if(tilesCollision[x + y * width] == null) {
-                    player.transform.position = new Vector3(x + 0.5f, y + 0.5f, player.transform.position.z);
+                    player.transform.position = new Vector3(x + 0.5f, y + 0.5f, -5f);
 
                     chosenX = x;
                     chosenY = y;
@@ -206,6 +225,11 @@ public class CavernGenerator : MonoBehaviour {
         for(int i = 0; i < numDepth; i++) {
             TryPlaceShrine();
         }
+
+        var numBomb = rand.RandomIntInRange(numBombPickup.x, numBombPickup.y);
+        for(int i = 0; i < numBomb; i++) {
+            TryPlaceBomb();
+        }
     }
 
     public void TryPlaceShrine() {
@@ -222,9 +246,26 @@ public class CavernGenerator : MonoBehaviour {
 
             if(numOcc == 0) {
                 var spawned = Instantiate(upgradeShrinePrefab);
-                spawned.transform.position = new Vector3(chosenX, chosenY, -2);
+                spawned.transform.parent = holder.transform;
+                spawned.transform.position = new Vector3(chosenX, chosenY, -3);
                 var upgrade = spawned.GetComponentInChildren<Powerup>();
                 upgrade.Setup(possibleEffects[rand.RandomIntLessThan(possibleEffects.Length)]);
+                return;
+            }
+        }
+    }
+
+    public void TryPlaceBomb() {
+        for(int i = 0; i < 10; i++) {
+            var chosenX = rand.RandomIntInRange(10, width - 10);
+            var chosenY = rand.RandomIntInRange(10, height - 10);
+
+            var numOcc = hardness.hardness[chosenX - 1 + (chosenY) * width];
+
+            if(numOcc == 0) {
+                var spawned = Instantiate(bombsPickup);
+                spawned.transform.parent = holder.transform;
+                spawned.transform.position = new Vector3(chosenX, chosenY + 0.5f, -3);
                 return;
             }
         }
@@ -269,7 +310,19 @@ public class CavernGenerator : MonoBehaviour {
             }
         }
 
-        Instantiate(stairs).transform.position = new Vector3(furtherLocation.x + 0.5f, furtherLocation.y + 0.5f, -0.1f);
+        Instantiate(stairs).transform.position = new Vector3(furtherLocation.x, furtherLocation.y, -0.1f);
+        tilemap.SetTile(new Vector3Int(furtherLocation.x, furtherLocation.y, 0), null);
+        tilemap.SetTile(new Vector3Int(furtherLocation.x - 1, furtherLocation.y, 0), null);
+        tilemap.SetTile(new Vector3Int(furtherLocation.x - 1, furtherLocation.y - 1, 0), null);
+        tilemap.SetTile(new Vector3Int(furtherLocation.x, furtherLocation.y - 1, 0), null);
+        undermap.SetTile(new Vector3Int(furtherLocation.x, furtherLocation.y, 1), null);
+        undermap.SetTile(new Vector3Int(furtherLocation.x - 1, furtherLocation.y, 1), null);
+        undermap.SetTile(new Vector3Int(furtherLocation.x - 1, furtherLocation.y - 1, 1), null);
+        undermap.SetTile(new Vector3Int(furtherLocation.x, furtherLocation.y - 1, 1), null);
+        undermap.SetTile(new Vector3Int(furtherLocation.x, furtherLocation.y, 2), null);
+        undermap.SetTile(new Vector3Int(furtherLocation.x - 1, furtherLocation.y, 2), null);
+        undermap.SetTile(new Vector3Int(furtherLocation.x - 1, furtherLocation.y - 1, 2), null);
+        undermap.SetTile(new Vector3Int(furtherLocation.x, furtherLocation.y - 1, 2), null);
     }
 
     protected Vector2Int RandomDirection(Vector2Int curPos, Vector2Int playerPos) {

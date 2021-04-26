@@ -47,7 +47,12 @@ namespace Entities.AttackEffects {
                 var res = results[i].GetComponent<Resources>();
                 
                 if(res != null && res != eff.doNotHit) {
-                    if(res.Damage(damage)) {
+                    float curDamage = damage;
+                    foreach(Effect e in eff.effects) {
+                        e.ChangeStrength(eff, ref curDamage);
+                    }
+
+                    if(res.Damage((int) curDamage)) {
                         hasHit = true;
 
                         if(eff is Projectile) {

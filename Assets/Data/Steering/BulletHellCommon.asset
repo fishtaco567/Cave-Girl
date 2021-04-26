@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e7dfd66e0636a074e8ec8526ce9a4243, type: 3}
+  m_Name: BulletHellCommon
+  m_EditorClassIdentifier: 
+  type: shoot
+  attackInTime: 0.5
+  projDelay: 0.05
+  totalTime: 0.75
+  attackRange: 10
+  toAttack:
+    serializedVersion: 2
+    m_Bits: 64
+  attackChance: 0.0008
+  offChance: 0.0005
+  projectiles:
+  - {fileID: 278313923863215783, guid: a3fc9da4681b1df489277ff0d599abcb, type: 3}
+  speed: 5

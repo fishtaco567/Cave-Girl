@@ -30,11 +30,9 @@ namespace Entities.AttackEffects {
                 var vectorTo = results[i].transform.position - proj.transform.position;
                 vectorTo.z = 0;
                 vectorTo = vectorTo.normalized * velocity.magnitude;
-                Debug.Log("1 " + velocity.magnitude);
 
                 velocity.x = vectorTo.x;
                 velocity.y = vectorTo.y;
-                Debug.Log("2 " + velocity.magnitude);
             }
 
             return true;

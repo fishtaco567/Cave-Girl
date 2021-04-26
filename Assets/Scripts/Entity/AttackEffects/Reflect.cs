@@ -20,6 +20,7 @@ namespace Entities.AttackEffects {
             var vel = Vector2.Reflect(proj.GetVelocity(), normal.normalized);
             reflected.SetVelocity(vel);
             reflected.transform.position = proj.transform.position + new Vector3(vel.x, vel.y, 0) * 0.05f;
+            reflected.transform.parent = GameManager.Instance.holder.transform;
 
             return true;
         }

@@ -29,6 +29,7 @@ namespace Entities.AttackEffects {
                     newProj.SetVelocity(velocity * proj.GetVelocity().magnitude);
                 }
 
+                newProj.transform.parent = GameManager.Instance.holder.transform;
                 newProj.transform.position = proj.transform.position + new Vector3(velocity.x, velocity.y, 0) * 0.1f;
             }
             return false;

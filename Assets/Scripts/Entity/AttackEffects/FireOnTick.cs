@@ -36,6 +36,7 @@ namespace Entities.AttackEffects {
                 time = 0;
                 var spawned = GameObject.Instantiate(firePrefab);
                 spawned.transform.position = eff.transform.position;
+                spawned.transform.parent = GameManager.Instance.holder.transform;
                 var proj = spawned.GetComponent<Effectable>();
                 if(proj != null) {
                     var effectsToTransfer = eff.GetEffectSublist(1);

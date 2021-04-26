@@ -31,6 +31,7 @@ namespace Entities.AttackEffects {
             }
 
             spawned.transform.position = eff.transform.position;
+            spawned.transform.parent = GameManager.Instance.holder.transform;
         }
 
         public override Effect GenerateCopy() {

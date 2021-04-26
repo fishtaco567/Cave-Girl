@@ -626,7 +626,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 267b6e19add02d74aacee65f9765f36e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  effects: []
+  effects:
+  - {fileID: 11400000, guid: 4a3574949a807df4c98c39e03a55494f, type: 2}
   doNotHit: {fileID: 0}
   controller: {fileID: 1717829898152291596}
   sprite: {fileID: 1717829897050939143}
@@ -638,10 +639,10 @@ MonoBehaviour:
   playerAnimator: {fileID: 118282313}
   directionalThings: {fileID: 1717829897019672376}
   projectilePrefab: {fileID: 278313923863215783, guid: a3fc9da4681b1df489277ff0d599abcb, type: 3}
-  moveSpeed: 10
+  moveSpeed: 8
   dashSpeed: 15
   dashNudgeSpeed: 5
-  jumpSpeed: 11
+  jumpSpeed: 5
   jumpYSpeed: 0.2
   maxAcceleration: 1
   minHeldDash: 0.5
@@ -655,6 +656,7 @@ MonoBehaviour:
   swordDamage: 1
   arrowSpawnAnchor: {fileID: 1717829897736282677}
   baseArrowSpeed: 17
+  chanceLosePowerupOnHit: 0.3
   velocity: {x: 0, y: 0}
   tilemap: {fileID: 0}
   hardness: {fileID: 0}
@@ -764,7 +766,7 @@ Rigidbody2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1717829898152291598}
-  m_BodyType: 1
+  m_BodyType: 2
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
