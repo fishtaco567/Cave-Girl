@@ -32,6 +32,10 @@ namespace Entities {
             base.Start();
             time = 0;
             OnSpawn();
+            GameManager.Instance.curNumProjectiles += 1;
+            if(GameManager.Instance.curNumProjectiles > 200) {
+                Destroy(this.gameObject);
+            }
         }
 
         protected void Update() {
@@ -100,6 +104,12 @@ namespace Entities {
         public void OnSpawn() {
             foreach(Effect effect in effects) {
                 effect.OnSpawn(this);
+            }
+        }
+
+        public void OnDestroy() {
+            if(GameManager.Instance != null) {
+                GameManager.Instance.curNumProjectiles -= 1;
             }
         }
 

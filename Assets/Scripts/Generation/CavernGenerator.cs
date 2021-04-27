@@ -404,7 +404,9 @@ public class CavernGenerator : MonoBehaviour {
             }
         }
 
-        Instantiate(stairs).transform.position = new Vector3(furtherLocation.x, furtherLocation.y, -0.1f);
+        var stairsSp = Instantiate(stairs);
+        stairsSp.transform.position = new Vector3(furtherLocation.x, furtherLocation.y, -0.1f);
+        stairsSp.transform.parent = holder.transform;
         tilemap.SetTile(new Vector3Int(furtherLocation.x, furtherLocation.y, 0), null);
         tilemap.SetTile(new Vector3Int(furtherLocation.x - 1, furtherLocation.y, 0), null);
         tilemap.SetTile(new Vector3Int(furtherLocation.x - 1, furtherLocation.y - 1, 0), null);

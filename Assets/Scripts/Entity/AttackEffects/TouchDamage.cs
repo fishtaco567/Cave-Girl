@@ -20,11 +20,26 @@ namespace Entities.AttackEffects {
         protected ContactFilter2D filter;
 
         [SerializeField]
-        protected int damage;
+        public int damage;
 
         protected void Awake() {
             destroyOnTouch = destroy;
             results = new Collider2D[3];
+        }
+
+        public override bool AddEffect(Effectable eff) {
+            bool found = false;
+            foreach(Effect e in eff.effects) {
+                if(e is TouchDamage && e != this) {
+                    (e as TouchDamage).damage += this.damage;
+                    found = true;
+                }
+            }
+
+            if(found) {
+                eff.effects.Remove(this);
+            }
+            return true;
         }
 
         public override bool PerTick(Effectable eff) {
@@ -44,6 +59,10 @@ namespace Entities.AttackEffects {
                     continue;
                 }
                 if(results[i].gameObject == eff.gameObject) {
+                    continue;
+                }
+
+                if(results[i].gameObject.transform.position.z > 1) {
                     continue;
                 }
 
@@ -96,7 +115,9 @@ namespace Entities.AttackEffects {
         }
 
         public override Effect GenerateCopy() {
-            return Instantiate(this);
+            var inst = Instantiate(this);
+            inst.damage = 1;
+            return inst;
         }
     }
 

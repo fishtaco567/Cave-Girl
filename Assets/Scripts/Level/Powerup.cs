@@ -37,7 +37,7 @@ public class Powerup : MonoBehaviour {
         for(int i = 0; i < num; i++) {
             var eff = results[i].GetComponent<Effectable>();
             if(eff != null) {
-                eff.AddEffect(effect);
+                eff.AddEffect(effect.GenerateCopy());
 
                 Instantiate(toSpawn).transform.position = transform.position;
 

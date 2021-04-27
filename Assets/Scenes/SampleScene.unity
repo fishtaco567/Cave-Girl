@@ -968,7 +968,7 @@ RectTransform:
   - {fileID: 1407192171}
   - {fileID: 12592415}
   m_Father: {fileID: 1250056409}
-  m_RootOrder: 12
+  m_RootOrder: 13
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -2823,7 +2823,7 @@ RectTransform:
   - {fileID: 642246554}
   - {fileID: 189301474}
   m_Father: {fileID: 1250056409}
-  m_RootOrder: 13
+  m_RootOrder: 12
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -4457,7 +4457,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: -120}
-  m_SizeDelta: {x: 200, y: 50}
+  m_SizeDelta: {x: 300, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &868668388
 MonoBehaviour:
@@ -4479,7 +4479,11 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Depth:'
+  m_text: 'Depth:
+
+    Number of Water Pickups:
+
+    Maximum Powerups:'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: c5da63a30599717419907609e400d9d2, type: 2}
   m_sharedMaterial: {fileID: -2645266648772853125, guid: c5da63a30599717419907609e400d9d2, type: 2}
@@ -4704,6 +4708,7 @@ MonoBehaviour:
   inGameMenu: 0
   moisture: {fileID: 1007840312}
   moistureText: {fileID: 1908431653}
+  curNumProjectiles: 0
 --- !u!4 &947029439
 Transform:
   m_ObjectHideFlags: 0
@@ -6985,8 +6990,8 @@ RectTransform:
   - {fileID: 1176001235}
   - {fileID: 813104585}
   - {fileID: 739916405}
-  - {fileID: 225540248}
   - {fileID: 570667608}
+  - {fileID: 225540248}
   m_Father: {fileID: 0}
   m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -7673,7 +7678,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "MOVE:\nDASH:\nJUMP:\nSWORD: \nSHOOT:\nBOMB:\nPAUSE:"
+  m_text: "MOVE:\nDASH (HOLD):\nJUMP:\nSWORD: \nSHOOT (HOLD):\nBOMB:\nPAUSE:"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: c5da63a30599717419907609e400d9d2, type: 2}
   m_sharedMaterial: {fileID: -2645266648772853125, guid: c5da63a30599717419907609e400d9d2, type: 2}
@@ -8380,7 +8385,7 @@ MonoBehaviour:
   - 0.15
   - 0.03
   - 0.03
-  - 0.09
+  - 0
   - 0.15
   holder: {fileID: 0}
   spawner: {fileID: 1066904877}
@@ -9890,7 +9895,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 25, y: 50}
+  m_AnchoredPosition: {x: 25, y: 30}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1627888198
@@ -9913,16 +9918,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'TRAPPED ON A DESERT PLANET, AQUA GOTH SEARCHES FOR WATER UNDERGROUND
-
-
-    ...
-
-    ...
-
-
-    Can
-    she survive long enough to find it?'
+  m_text: "TRAPPED ON A DESERT PLANET, THE \n<size=36>SUPER AQUA GOTH</size> SEARCHES
+    FOR WATER UNDERGROUND\n...\n...\nCan she survive long enough to find it?"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: c5da63a30599717419907609e400d9d2, type: 2}
   m_sharedMaterial: {fileID: -2645266648772853125, guid: c5da63a30599717419907609e400d9d2, type: 2}
@@ -10905,7 +10902,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: CAVE GIRL
+  m_text: 'CAVE GIRL
+
+    <size=32>SUPER AQUA GOTH'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: c5da63a30599717419907609e400d9d2, type: 2}
   m_sharedMaterial: {fileID: -2645266648772853125, guid: c5da63a30599717419907609e400d9d2, type: 2}
@@ -12101,6 +12100,14 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1717829896672984880, guid: 73f4cb9b00756fa4687c8a3114bdefa6, type: 3}
+      propertyPath: m_TargetTexture
+      value: 
+      objectReference: {fileID: 8400000, guid: 0c924254a41e4db4882ac4145bc74e7c, type: 2}
+    - target: {fileID: 1717829896672984881, guid: 73f4cb9b00756fa4687c8a3114bdefa6, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1717829898152291593, guid: 73f4cb9b00756fa4687c8a3114bdefa6, type: 3}
       propertyPath: m_RootOrder
       value: 3
@@ -12145,13 +12152,66 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 1717829898152291597, guid: 73f4cb9b00756fa4687c8a3114bdefa6, type: 3}
-      propertyPath: lessMoisturePerSecond.m_Curve.Array.data[1].time
-      value: 5000
-      objectReference: {fileID: 0}
     - target: {fileID: 1717829898152291598, guid: 73f4cb9b00756fa4687c8a3114bdefa6, type: 3}
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 73f4cb9b00756fa4687c8a3114bdefa6, type: 3}
+--- !u!1001 &7357040904336375421
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 6011514938854054525, guid: 75f017c5b38c4914a9dbfdcd140a6ba7, type: 3}
+      propertyPath: m_RootOrder
+      value: 9
+      objectReference: {fileID: 0}
+    - target: {fileID: 6011514938854054525, guid: 75f017c5b38c4914a9dbfdcd140a6ba7, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -100
+      objectReference: {fileID: 0}
+    - target: {fileID: 6011514938854054525, guid: 75f017c5b38c4914a9dbfdcd140a6ba7, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 6011514938854054525, guid: 75f017c5b38c4914a9dbfdcd140a6ba7, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6011514938854054525, guid: 75f017c5b38c4914a9dbfdcd140a6ba7, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6011514938854054525, guid: 75f017c5b38c4914a9dbfdcd140a6ba7, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6011514938854054525, guid: 75f017c5b38c4914a9dbfdcd140a6ba7, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6011514938854054525, guid: 75f017c5b38c4914a9dbfdcd140a6ba7, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6011514938854054525, guid: 75f017c5b38c4914a9dbfdcd140a6ba7, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6011514938854054525, guid: 75f017c5b38c4914a9dbfdcd140a6ba7, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6011514938854054525, guid: 75f017c5b38c4914a9dbfdcd140a6ba7, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8375761012958304849, guid: 75f017c5b38c4914a9dbfdcd140a6ba7, type: 3}
+      propertyPath: m_Name
+      value: LightHolder
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 75f017c5b38c4914a9dbfdcd140a6ba7, type: 3}

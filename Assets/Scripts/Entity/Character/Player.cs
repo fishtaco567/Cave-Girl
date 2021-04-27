@@ -167,6 +167,17 @@ namespace Entities.Character {
 
         public AnimationCurve lessMoisturePerSecond;
 
+        [SerializeField]
+        protected Material mat;
+        [SerializeField]
+        protected Color startCol;
+        [SerializeField]
+        protected Color col;
+        [SerializeField]
+        protected float maxDepth;
+
+        public int maxPowerups;
+
         public override void Start() {
             base.Start();
 
@@ -203,6 +214,8 @@ namespace Entities.Character {
 
             isDead = false;
 
+            maxPowerups = 0;
+
             var res = GetComponent<Resources>();
             res.OnDeath += OnDeath;
             res.OnHit += OnHit;
@@ -227,6 +240,8 @@ namespace Entities.Character {
         }
 
         protected void Update() {
+            maxPowerups = Mathf.Max(maxPowerups, effects.Count);
+
             if(isDead || GameManager.Instance.inGame == false) {
                 if(isDead) {
                     TrySetAnimator("Die");
@@ -234,10 +249,22 @@ namespace Entities.Character {
                 return;
             }
 
-            moisture -= lessMoisturePerSecond.Evaluate(GameManager.Instance.depth) * Time.deltaTime;
+            var moistureDt = Time.deltaTime;
+            foreach(Effect e in effects) {
+                e.ChangeTime(this, ref moistureDt);
+            }
+            moistureDt = Mathf.Min(moistureDt, 1);
+
+            moisture -= lessMoisturePerSecond.Evaluate(GameManager.Instance.depth) * moistureDt;
             if(moisture <= 0) {
                 moisture = 0;
                 OnDeath();
+            }
+
+            mat.SetColor("_ShadowCol", Color.Lerp(startCol, col, GameManager.Instance.depth / maxDepth));
+
+            if(moisture > 1.5) {
+                moisture = 1.5f;
             }
 
             flags.Clear();
@@ -521,8 +548,11 @@ namespace Entities.Character {
         }
 
         private void CheckSwordAttack() {
+            float currentDamage = swordDamage;
+            
             foreach(Effect e in effects) {
                 e.DuringAttack(this, swordCollider.bounds.center);
+                e.ChangeStrength(this, ref currentDamage);
             }
 
             var num = swordCollider.OverlapCollider(hittableFilter, results);
@@ -534,7 +564,7 @@ namespace Entities.Character {
                         e.OnHit(this, health);
                     }
 
-                    health.Damage(swordDamage);
+                    health.Damage((int) currentDamage);
                 }
             }
         }

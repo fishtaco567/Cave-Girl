@@ -26,8 +26,8 @@ public class Stairs : MonoBehaviour {
             hasTriggered = true;
             var thing = results[0].gameObject;
             thing.transform.position = new Vector3(thing.transform.position.x, thing.transform.position.y, 5f);
-            GameManager.Instance.NextLevel();
             Destroy(this.gameObject, 0.5f);
+            GameManager.Instance.NextLevel();
         }
     }
 

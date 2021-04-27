@@ -75,6 +75,8 @@ public class GameManager : Singleton<GameManager> {
     [SerializeField]
     protected TMPro.TMP_Text moistureText;
 
+    public int curNumProjectiles;
+
     // Use this for initialization
     void Start() {
         inGame = false;
@@ -163,7 +165,9 @@ public class GameManager : Singleton<GameManager> {
         player.isDead = true;
         inDeathScene = true;
         deathScreen.SetActive(true);
-        deathDepthText.text = string.Format("Depth: {0, 0:F2} meters", depth);
+        deathDepthText.text = string.Format("Depth: {0, 0:F2} meters\n" +
+            "Number of Water Pickups: {1} Jugs\n" +
+            "Maximum Powerups: {2}", depth, player.water, player.maxPowerups);
     }
 
     public void Retry() {
@@ -173,6 +177,7 @@ public class GameManager : Singleton<GameManager> {
     }
 
     public void Exit() {
+        depth = 0;
         inGame = false;
         Time.timeScale = 1;
         controls.SetActive(false);

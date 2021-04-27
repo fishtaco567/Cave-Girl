@@ -24,7 +24,7 @@ public class RenderScreen : MonoBehaviour {
     void OnPostRender () {
         cam.targetTexture = null;
         if(mat != null) {
-            var rt = RenderTexture.GetTemporary(256, 144);
+            var rt = RenderTexture.GetTemporary(480, 270);
             rt.filterMode = FilterMode.Point;
             Graphics.Blit(texture, rt, mat);
             Graphics.Blit(rt, null as RenderTexture);

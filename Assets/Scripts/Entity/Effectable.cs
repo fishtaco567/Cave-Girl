@@ -22,7 +22,7 @@ namespace Entities {
             var instEffects = new List<Effect>(effects.Count);
 
             foreach(Effect e in effects) {
-                instEffects.Add(Instantiate(e));
+                instEffects.Add(e.GenerateCopy());
                 e.AddEffect(this);
             }
 
@@ -30,7 +30,7 @@ namespace Entities {
         }
 
         public void AddEffect(Effect newEffect) {
-            effects.Insert(0, newEffect);
+            effects.Insert(0, newEffect.GenerateCopy());
             newEffect.AddEffect(this);
         }
 
